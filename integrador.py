@@ -19,13 +19,13 @@ def main():
 	<div style="background-color:tomato;"><p style="color:white;font-size:50px;padding:10px">Streamlit is Awesome</p></div>
 	"""
 	page = st.sidebar.selectbox("Escolha uma página", ["Data Scientist", "Business"])
-
-        if page == "Data Scientist":
-            st.header("This is your data explorer.")
-            st.write("Please select a page on the left.")
-        elif page == "Business":
-            st.title("Calcule a quantidade de peças a serem compradas")
-            visualize_data()
+	
+	if page == "Data Scientist":
+		st.header("This is your data explorer.")
+		st.write("Please select a page on the left.")
+	elif page == "Business":
+		st.title("Calcule a quantidade de peças a serem compradas")
+		visualize_data()
 
 def visualize_data():
 	st.markdown(html_temp,unsafe_allow_html=True)
