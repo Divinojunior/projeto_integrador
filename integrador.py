@@ -12,12 +12,22 @@ import seaborn as sns
 
 def main():
 	""" Common ML Dataset Explorer """
-	st.title("Common ML Dataset Explorer")
-	st.subheader("Datasets For ML Explorer with Streamlit")
+	st.title("Projeto Integrador")
+	st.subheader("Explorando o Dataset")
 
 	html_temp = """
 	<div style="background-color:tomato;"><p style="color:white;font-size:50px;padding:10px">Streamlit is Awesome</p></div>
 	"""
+	page = st.sidebar.selectbox("Escolha uma página", ["Data Scientist", "Business"])
+
+        if page == "Data Scientist":
+            st.header("This is your data explorer.")
+            st.write("Please select a page on the left.")
+        elif page == "Business":
+            st.title("Calcule a quantidade de peças a serem compradas")
+            visualize_data()
+
+def visualize_data():
 	st.markdown(html_temp,unsafe_allow_html=True)
 
 	def file_selector(folder_path='./datasets'):
@@ -137,21 +147,6 @@ def main():
 			cust_plot= df[selected_columns_names].plot(kind=type_of_plot)
 			st.write(cust_plot)
 			st.pyplot()
-
-	if st.button("Thanks"):
-		st.balloons()
-
-	st.sidebar.header("About App")
-	st.sidebar.info("A Simple EDA App for Exploring Common ML Dataset")
-
-	st.sidebar.header("Get Datasets")
-	st.sidebar.markdown("[Common ML Dataset Repo]("")")
-
-	st.sidebar.header("About")
-	st.sidebar.info("Jesus Saves@JCharisTech")
-	st.sidebar.text("Built with Streamlit")
-	st.sidebar.text("Maintained by Jesse JCharis")
-
 
 if __name__ == '__main__':
 	main()
