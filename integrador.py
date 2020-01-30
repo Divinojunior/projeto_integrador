@@ -148,7 +148,7 @@ def visualize_data():
 			st.write(cust_plot)
 			st.pyplot()
 
-def predicao()
+#def predicao():
 
 if __name__ == '__main__':
 	main()
