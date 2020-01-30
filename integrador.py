@@ -30,7 +30,7 @@ def main():
 
 def visualize_data():
 
-	def file_selector(folder_path='./datasets'):
+	def file_selector(folder_path='.'):
 		filenames = os.listdir(folder_path)
 		selected_filename = st.selectbox("Select A file",filenames)
 		return os.path.join(folder_path,selected_filename)
@@ -147,6 +147,8 @@ def visualize_data():
 			cust_plot= df[selected_columns_names].plot(kind=type_of_plot)
 			st.write(cust_plot)
 			st.pyplot()
+
+def predicao()
 
 if __name__ == '__main__':
 	main()
