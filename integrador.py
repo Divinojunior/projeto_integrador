@@ -2,13 +2,13 @@ import os
 import streamlit as st 
 
 # EDA Pkgs
-import pandas as pd 
+#import pandas as pd 
 
 # Viz Pkgs
-import matplotlib.pyplot as plt 
-import matplotlib
-matplotlib.use('Agg')
-import seaborn as sns 
+#import matplotlib.pyplot as plt 
+#import matplotlib
+#matplotlib.use('Agg')
+#import seaborn as sns 
 
 def main():
 	""" Common ML Dataset Explorer """
