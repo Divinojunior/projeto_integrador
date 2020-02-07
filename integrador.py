@@ -1,5 +1,6 @@
-#pip freeze > requirements.txt
-#coment
+#pip freeze > requirements.txt (deletar )
+#streamlit run integrador.py
+
 import os
 import streamlit as st 
 from PIL import Image
@@ -31,8 +32,8 @@ def main():
 		st.header("Explore aqui o seu Dataset")
 		visualize_data()
 	elif page == "Business":
-		st.title("Calculando a probabilidade do sócio sair")
-		predicao()
+		st.title("Prevendo a quantidade de peças")
+		predicao_fernando()
 
 def visualize_data():
 
@@ -154,87 +155,162 @@ def visualize_data():
 			st.write(cust_plot)
 			st.pyplot()
 
-def predicao():
-	df=pd.read_csv('./Datasets/SOCIOS_USO_CONCATL.csv', encoding='latin-1', delimiter = ';')
+def Teste (LinhaProduto,Codigo,CentroCusto,Cliente):
 
+    import pandas as pd
+    import plotly.express as px 
 
-	#st.sidebar.slider('slider',1,10)
+    #x = input('1-Vendas_Integrador_100Vies-Rev1.csv')
+    #meu endereço - C:\Users\fgolo\Desktop\Integrador\1-Vendas_Integrador_100Vies-Rev1.csv
 
-	#st.multiselect('multiselect', [1,2,3])
+    df = pd.read_csv('./Datasets/1-Vendas_Integrador_100Vies-Rev1.csv')
+    df['ano'] = df['DataVenda'].str[6:10]
+    df['mes'] = df['DataVenda'].str[3:5]
+    df['dia'] = df['DataVenda'].str[0:2]
+    df['data'] = df['ano']+'-'+df['mes']+'-'+df['dia']
+    df['data'] = pd.to_datetime(df['data'])
+    df['semana'] = df['data'].dt.week
+    df['semana'] = df['semana'].apply(str)
+    df['semana'] = df['semana'].apply(lambda x: x.zfill(2))
+    df['ano-semana'] = 'a' + df['ano'] + 's' + df['semana']  
+    df = df.sort_values(by=['ano','mes','dia'])
 
-	#st.sidebar.selectbox('selectbox',[1,2,3,4])
-	meses_assoc = st.sidebar.number_input('Qnt Meses Associação', value=1, min_value = 0, max_value = 1000, step=1)
+    #df.to_csv(r'C:\Users\fgolo\Desktop\Teste\Teste.csv')
 
-	pagos_dia = st.sidebar.number_input('Qnt Boletos Pagos em Dia', value=1, min_value = 0, max_value = 1000, step=1)
+    def Teste2 (LinhaProduto):
+        for i in [LinhaProduto]:
+            if i in df.values:
+                df2 = df.loc[df['LinhaProduto'] == i]
+                #df2.to_csv(r'C:\Users\fgolo\Desktop\Teste\Teste2.csv')
+            elif i == 'Todos':
+                df2 = df
+                #df2.to_csv(r'C:\Users\fgolo\Desktop\Teste\Teste2.csv')
+            else:
+                print ("Linha de Produto não existente")
+        return df2 
 
-	pago_atraso = st.sidebar.number_input('Qnt Boletos Pagos Atrasados', value=1, min_value = 0, max_value = 1000, step=1)
+    df2 = Teste2(LinhaProduto)   
+    
+    def Teste3 (Codigo):
+        for j in [Codigo]:
+            if j in df2.values:
+                df3 = df2.loc[df2['Codigo'] == j]
+                #df3.to_csv(r'C:\Users\fgolo\Desktop\Teste\Teste3.csv')
+            elif j == 'Todos':
+                df3 = df2
+                #df3.to_csv(r'C:\Users\fgolo\Desktop\Teste\Teste3.csv')
+            else:
+                print ("Codigo não pertence a Lista de Produtos selecionada")
+        return df3
 
-	abertos = st.sidebar.number_input('Qnt Boletos Abertos', value=1, min_value = 0, max_value = 1000, step=1)
+    df3 = Teste3(Codigo)
 
-	cargo1 = st.sidebar.number_input('Qnt Participações - Cargo 1', value=1, min_value = 0, max_value = 1000, step=1)
+    def Teste4 (CentroCusto):
+        for k in [CentroCusto]:
+            if k in df3.values:
+                df4 = df3.loc[df3['CentroCusto'] == k]
+                #df4.to_csv(r'C:\Users\fgolo\Desktop\Teste\Teste4.csv')
+            elif k == 'Todos':
+                df4 = df3
+                #df4.to_csv(r'C:\Users\fgolo\Desktop\Teste\Teste4.csv')
+            else:
+                print ("Centro de Custo não vendeu esse componente")
+        return df4
 
-	cargo2 = st.sidebar.number_input('Qnt Participações - Cargo 2', value=1, min_value = 0, max_value = 1000, step=1)
+    df4 = Teste4(CentroCusto)
 
-	cargo3 = st.sidebar.number_input('Qnt Participações - Cargo 3', value=1, min_value = 0, max_value = 1000, step=1)
+    def Teste5 (Cliente):
+        for l in [Cliente]:
+            if l in df4.values:
+                df5 = df4.loc[df4['Cliente'] == l]
+                #df5.to_csv(r'C:\Users\fgolo\Desktop\Teste\Teste5.csv')
+            elif l == 'Todos':
+                df5 = df4
+                #df5.to_csv(r'C:\Users\fgolo\Desktop\Teste\Teste5.csv')
+            else:
+                print ("Cliente não comprou desse centro de custo")
+        return df5
+    
+    df5 = Teste5(Cliente)
 
-	total_part = st.sidebar.number_input('Qnt Total de Participações', value=1, min_value = 0, max_value = 1000, step=1)
+    df6 = df5.groupby(['ano','ano-semana','Codigo','Cliente']).sum().reset_index()
+    df6 = df6.sort_values(by=['ano'])
 
-	meses_sem_part = st.sidebar.number_input('Qnt Meses sem Participações', value=1, min_value = 0, max_value = 1000, step=1)
+    def semanaa (a,b):
+        semanaa = []
+        for i in range(2017,b):
+            i = str(i)
+            for j in range(1,a):
+                j = str(j)
+                j = j.zfill(2)
+                z = 'a' + i + 's' + j
+                semanaa.append(z)
+        return semanaa
 
+    semanaa = semanaa(53,2021)
 
-	#st.sidebar.date_input("date_input", date(2020, 1, 20))
+    def semana ():
+        semana = df6['ano-semana'].to_list()
+        for i in semanaa:
+            if i not in semana:
+                semana.append(i)
+            else:
+                pass
+        return semana
 
-	#st.sidebar.checkbox('checkbox')
+    a = semana()
 
-	st.write(df)
+    def Teste6 (x):
+        semana = []
+        quantidade = []
+        cliente = []
+        z = 0
+        for i in a:
+            if i in df6.values:
+                x = df6.at[z,'Quantidade']
+                y = df6.at[z,'Cliente']
+                semana.append(i)
+                quantidade.append(x)
+                cliente.append(y)
+                z = z+1
+            else:
+                semana.append(i)
+                quantidade.append(0)
+                cliente.append ('')              
+                z = z+1
+        dfa = pd.DataFrame({'semana':semana,'cliente':cliente,'quantidade':quantidade})
+        dfa = dfa.sort_values(by='semana')
+        
+        return dfa 
+    
+    dfa = Teste6(a)
+    dfa = dfa.reset_index()
+    dfaa = dfa.groupby(['semana']).sum().reset_index()
+    dfaa = dfaa.sort_values(by='semana')
+    dfa['semana'] = dfa['semana'].str[5:8] + dfa['semana'].str[0:5]
+    suporte = dfa['semana'].to_list()
+    
+    #dfa.to_csv(r'C:\Users\fgolo\Desktop\Teste\TesteT.csv')
+    #dfaa.to_csv(r'C:\Users\fgolo\Desktop\Teste\TesteTT.csv')
 
-	csv = df.to_csv(index=False)
-	b64 = base64.b64encode(csv.encode()).decode() 
-	href = f'<a href="data:file/csv;base64,{b64}" download="export.csv">Exportar df</a>'
-	st.markdown(href, unsafe_allow_html=True)
+    fig = px.bar(dfa , x='semana' , y='quantidade' , color='cliente'  , category_orders={'semana':suporte},
+                 template='plotly_dark' , color_discrete_sequence=px.colors.sequential.Rainbow)
+    
+    fig2 = px.line(dfaa , x='semana' , y='quantidade' , category_orders={'semana':suporte} ,
+                   template='plotly_dark')
 
-	import numpy as np
-	#image = Image.open('img.png')
-	#st.image(image)
-	#X_new = np.array(meses_assoc, pagos_dia, pago_atraso, abertos, cargo1, cargo2, cargo3, total_part, meses_sem_part)
-	X_new = ([[meses_assoc, pagos_dia, pago_atraso, abertos, cargo1, cargo2, cargo3, total_part, meses_sem_part]])
-	X =  pd.DataFrame(df.drop(["COD_EMPRESA","COD_FILIAL","B_PEDIDO_DEMISSAO","B_SOCIO","GRUPO1","GRUPO2","GRUPO3","GRUPO4","GRUPO5","GRUPO6","GRUPO7","GRUPO8","GRUPO9","GRUPO10","GRUPO11","PORTE","PAGO_EM_DIA_POSTERGADO"],axis = 1),)
-	y = df.B_PEDIDO_DEMISSAO
+    #fig.show()
+    #fig2.show()
+    st.write(fig)
+    st.write(fig2)
 
-	from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-
-	from sklearn import tree
-	# instanciando e ajustando o modelo
-
-	#clf = tree.DecisionTreeClassifier(criterion='gini',max_depth=9,min_samples_split=50)
-	#clf = clf.fit(X,y)
-
-	clf_2 = GradientBoostingClassifier(learning_rate= 0.1, max_depth= 6, n_estimators= 50)
-	clf_2 = clf_2.fit(X,y)
-
-
-
-	#predictions_DT = clf.predict_proba(X_new)
-	predictions_GB = clf_2.predict_proba(X_new)
-
-
-	#st.write(predictions_DT)
-	st.write("PROBABILIDADE DO SOCIO SAIR ",round(predictions_GB[0][1]*100,2),'%')
-	#st.write(round(predictions_GB[0][1],2),'%')
-	#st.write(predictions_GB)
-	#st.write(X_new)
-	import shap  # package used to calculate Shap values
-
-	# Create object that can calculate shap values
-	explainer = shap.TreeExplainer(rfc)
-
-	# calculate shap values. This is what we will plot.
-	# Calculate shap_values for all of val_X rather than a single row, to have more data for plot.
-	shap_values = explainer.shap_values(X)
-
-	# Make plot. Index of [1] is explained in text below.
-	shap.summary_plot(shap_values[1], X)
-	shap.summary_plot(shap_values, X, plot_type='bar')
-
+def predicao_fernando():
+    #st_linhaproduto = st.sidebar.number_input('Linha do produto', value=1, min_value = 0, max_value = 1000, step=1)
+    #st_codigoproduto = st.sidebar.number_input('Código do produto', value=1, min_value = 0, max_value = 1000, step=1)
+    #st_cliente = st.sidebar.number_input('Cliente', value=1, min_value = 0, max_value = 1000, step=1)
+    
+    Teste('Todos','Todos',21320,'Todos')
+    #Teste(st_linhaproduto,st_codigoproduto,21320,st_cliente)
+    
 if __name__ == '__main__':
 	main()
