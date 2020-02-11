@@ -46,7 +46,7 @@ def visualize_data():
 
 	def file_selector(folder_path='./Datasets'):
 		filenames = os.listdir(folder_path)
-		selected_filename = st.selectbox("Select A file",filenames)
+		selected_filename = st.selectbox("Escolha um arquivo",filenames)
 		return os.path.join(folder_path,selected_filename)
 
 	filename = file_selector()
@@ -311,7 +311,7 @@ def predicao_fernando():
 
 	if st.sidebar.checkbox("Selecionar linha do produto?",value=True):
 		#st_linhaproduto = st.sidebar.number_input('Selecione a linha do produto', value=1,min_value = 1, max_value = 201, step=1)
-		st_linhaproduto = st.sidebar.number_input('Selecione a linha do produto',min_value = 1, max_value = 201, step=1)
+		st_linhaproduto = st.sidebar.number_input('Selecione a linha do produto', value=0, min_value = 0, max_value = 201, step=1)
 	else:
 		st_linhaproduto = 'Todos'
 
@@ -323,7 +323,7 @@ def predicao_fernando():
 
 	if st.sidebar.checkbox("Selecionar cliente?",value=True):
 		#st_cliente = st.sidebar.number_input('Selecione o cliente', value=1, min_value = 1, max_value = 999, step=1)
-		st_cliente = st.sidebar.number_input('Selecione o cliente', min_value = 1, max_value = 999, step=1)
+		st_cliente = st.sidebar.number_input('Selecione o cliente', value = 0, min_value = 0, max_value = 999, step=1)
 	else:
 		st_cliente = 'Todos'
 
@@ -337,7 +337,7 @@ def predicao_fernando():
 	#	elif st_cliente != '' and st_cliente != 'Todos':
 	#		st_cliente == int(st_cliente)
 
-	if st_linhaproduto != '' and st_codproduto != '' and st_cliente != '':
+	if st_linhaproduto != 0 and st_codproduto != '' and st_cliente != 0:
 		#Teste('Todos','Todos',21320,'Todos')
 		#Teste(1,'A0000180133',21320,1)
 		#print ("Linha de Produto = ", st_linhaproduto)
