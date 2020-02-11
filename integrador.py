@@ -10,6 +10,7 @@ import base64
 
 # EDA Pkgs
 import pandas as pd 
+import numpy as np
 
 # Viz Pkgs
 import matplotlib.pyplot as plt 
@@ -37,7 +38,9 @@ def main():
 		predicao_fernando()
 	elif page == "Mario":
 		st.title('Prevendo a quantidade de peças - Mário')
-		predicao_mario()
+		st_produto = st.sidebar.number_input('Escolha um Código de Produto [entre 1 e 201]: ', value=0, min_value = 0, max_value = 201, step=1)
+		if st_produto != 0:
+			predicao_mario(st_produto)
 
 def visualize_data():
 
@@ -47,81 +50,70 @@ def visualize_data():
 		return os.path.join(folder_path,selected_filename)
 
 	filename = file_selector()
-	st.info("You Selected {}".format(filename))
+	st.info("Você selecionou {}".format(filename))
 
-	# Read Data
+	
+	# Ler dados
 	df = pd.read_csv(filename)
-	# Show Dataset
 
-	if st.checkbox("Show Dataset"):
-		number = st.number_input("Number of Rows to View")
+	# Mostrar conjunto de dados
+	if st.checkbox("Mostrar conjunto de dados"):
+		number = st.number_input("Número de linhas para exibir",1,200)
 		st.dataframe(df.head(number))
 
-	# Show Columns
-	if st.button("Column Names"):
+	
+	# Mostrar colunas
+	if st.button("Nomes das colunas"):
 		st.write(df.columns)
 
-	# Show Shape
-	if st.checkbox("Shape of Dataset"):
-		data_dim = st.radio("Show Dimension By ",("Rows","Columns"))
-		if data_dim == 'Rows':
-			st.text("Number of Rows")
+	# Mostrar Forma
+	if st.checkbox("Forma do conjunto de dados"):
+		data_dim = st.radio("Mostrar dimensão por",("Linhas","Colunas"))
+		if data_dim == 'Linhas':
+			st.text("Numero de linhas")
 			st.write(df.shape[0])
-		elif data_dim == 'Columns':
-			st.text("Number of Columns")
+		elif data_dim == 'Colunas':
+			st.text("Numero de colunas")
 			st.write(df.shape[1])
 		else:
 			st.write(df.shape)
 
 	# Select Columns
-	if st.checkbox("Select Columns To Show"):
+	if st.checkbox("Selecionar colunas para mostrar"):
 		all_columns = df.columns.tolist()
-		selected_columns = st.multiselect("Select",all_columns)
+		selected_columns = st.multiselect("Selecione",all_columns)
 		new_df = df[selected_columns]
 		st.dataframe(new_df)
-	
-	# Show Values
-	if st.button("Value Counts"):
-		st.text("Value Counts By Target/Class")
+
+	# Mostrar valores
+	if st.button("Contagens de valor"):
+		st.text("Contagens de valor por destino / classe")
 		st.write(df.iloc[:,-1].value_counts())
-
-
-	# Show Datatypes
-	if st.button("Data Types"):
+	
+	# Mostrar tipos de dados
+	if st.button("Tipos de dados"):
 		st.write(df.dtypes)
-
-
-
-	# Show Summary
-	if st.checkbox("Summary"):
+	
+	# Mostrar Resumo
+	if st.checkbox("Resumo"):
 		st.write(df.describe().T)
 
-	## Plot and Visualization
-
-	st.subheader("Data Visualization")
-	# Correlation
+	# Gráfico e visualização
+	st.subheader("Visualização de dados")
+	# Correlação
 	# Seaborn Plot
-	if st.checkbox("Correlation Plot[Seaborn]"):
+	if st.checkbox("Gráfico de Correlação [Seaborn]"):
 		st.write(sns.heatmap(df.corr(),annot=True))
 		st.pyplot()
 
-	
-	# Pie Chart
-	if st.checkbox("Pie Plot"):
+	# Contagem
+	if st.checkbox("Gráfico de contagens de valor"):
+		st.text("Contagens de valor por destino")
 		all_columns_names = df.columns.tolist()
-		if st.button("Generate Pie Plot"):
-			st.success("Generating A Pie Plot")
-			st.write(df.iloc[:,-1].value_counts().plot.pie(autopct="%1.1f%%"))
-			st.pyplot()
-
-	# Count Plot
-	if st.checkbox("Plot of Value Counts"):
-		st.text("Value Counts By Target")
-		all_columns_names = df.columns.tolist()
-		primary_col = st.selectbox("Primary Columm to GroupBy",all_columns_names)
-		selected_columns_names = st.multiselect("Select Columns",all_columns_names)
-		if st.button("Plot"):
-			st.text("Generate Plot")
+		primary_col = st.selectbox("Coluna Primária a Agrupar",all_columns_names)
+		selected_columns_names = st.multiselect("Selecionar colunas",all_columns_names)
+		if st.button("Gráfico"):
+			st.text("Gerar Gráfico")
 			if selected_columns_names:
 				vc_plot = df.groupby(primary_col)[selected_columns_names].count()
 			else:
@@ -129,18 +121,17 @@ def visualize_data():
 			st.write(vc_plot.plot(kind="bar"))
 			st.pyplot()
 
+	# Gráfico personalizável
 
-	# Customizable Plot
-
-	st.subheader("Customizable Plot")
+	st.subheader("Gráfico personalizável")
 	all_columns_names = df.columns.tolist()
-	type_of_plot = st.selectbox("Select Type of Plot",["area","bar","line","hist","box","kde"])
-	selected_columns_names = st.multiselect("Select Columns To Plot",all_columns_names)
+	type_of_plot = st.selectbox("Selecione o tipo de plotagem",["area","bar","line","hist","box","kde"])
+	selected_columns_names = st.multiselect("Selecionar colunas a serem plotadas",all_columns_names)
 
-	if st.button("Generate Plot"):
-		st.success("Generating Customizable Plot of {} for {}".format(type_of_plot,selected_columns_names))
+	if st.button("Gerar Gráfico"):
+		st.success("Gerando plotagem personalizável de {} para {}".format(type_of_plot,selected_columns_names))
 
-		# Plot By Streamlit
+		# Plot por Streamlit
 		if type_of_plot == 'area':
 			cust_data = df[selected_columns_names]
 			st.area_chart(cust_data)
@@ -153,172 +144,207 @@ def visualize_data():
 			cust_data = df[selected_columns_names]
 			st.line_chart(cust_data)
 
-		# Custom Plot 
+		# Gráfico personalizado
 		elif type_of_plot:
 			cust_plot= df[selected_columns_names].plot(kind=type_of_plot)
 			st.write(cust_plot)
 			st.pyplot()
 
+	if st.button("Obrigado"):
+		st.balloons()
+
 def Teste (LinhaProduto,Codigo,CentroCusto,Cliente):
 
-    import pandas as pd
-    import plotly.express as px 
+	import pandas as pd
+	import plotly.express as px 
 
-    #x = input('1-Vendas_Integrador_100Vies-Rev1.csv')
-    #meu endereço - C:\Users\fgolo\Desktop\Integrador\1-Vendas_Integrador_100Vies-Rev1.csv
+	#x = input('1-Vendas_Integrador_100Vies-Rev1.csv')
+	#meu endereço - C:\Users\fgolo\Desktop\Integrador\1-Vendas_Integrador_100Vies-Rev1.csv
 
-    df = pd.read_csv('./Datasets/1-Vendas_Integrador_100Vies-Rev1.csv')
-    df['ano'] = df['DataVenda'].str[6:10]
-    df['mes'] = df['DataVenda'].str[3:5]
-    df['dia'] = df['DataVenda'].str[0:2]
-    df['data'] = df['ano']+'-'+df['mes']+'-'+df['dia']
-    df['data'] = pd.to_datetime(df['data'])
-    df['semana'] = df['data'].dt.week
-    df['semana'] = df['semana'].apply(str)
-    df['semana'] = df['semana'].apply(lambda x: x.zfill(2))
-    df['ano-semana'] = 'a' + df['ano'] + 's' + df['semana']  
-    df = df.sort_values(by=['ano','mes','dia'])
+	df = pd.read_csv('./Datasets/1-Vendas_Integrador_100Vies-Rev1.csv')
 
-    #df.to_csv(r'C:\Users\fgolo\Desktop\Teste\Teste.csv')
+	df['ano'] = df['DataVenda'].str[6:10]
+	df['mes'] = df['DataVenda'].str[3:5]
+	df['dia'] = df['DataVenda'].str[0:2]
+	df['data'] = df['ano']+'-'+df['mes']+'-'+df['dia']
+	df['data'] = pd.to_datetime(df['data'])
+	df['semana'] = df['data'].dt.week
+	df['semana'] = df['semana'].apply(str)
+	df['semana'] = df['semana'].apply(lambda x: x.zfill(2))
+	df['ano-semana'] = 'a' + df['ano'] + 's' + df['semana']  
+	df = df.sort_values(by=['ano','mes','dia'])
 
-    def Teste2 (LinhaProduto):
-        for i in [LinhaProduto]:
-            if i in df.values:
-                df2 = df.loc[df['LinhaProduto'] == i]
-                #df2.to_csv(r'C:\Users\fgolo\Desktop\Teste\Teste2.csv')
-            elif i == 'Todos':
-                df2 = df
-                #df2.to_csv(r'C:\Users\fgolo\Desktop\Teste\Teste2.csv')
-            else:
-                print ("Linha de Produto não existente")
-        return df2 
+	#df.to_csv(r'C:\Users\fgolo\Desktop\Teste\Teste.csv')
 
-    df2 = Teste2(LinhaProduto)   
-    
-    def Teste3 (Codigo):
-        for j in [Codigo]:
-            if j in df2.values:
-                df3 = df2.loc[df2['Codigo'] == j]
-                #df3.to_csv(r'C:\Users\fgolo\Desktop\Teste\Teste3.csv')
-            elif j == 'Todos':
-                df3 = df2
-                #df3.to_csv(r'C:\Users\fgolo\Desktop\Teste\Teste3.csv')
-            else:
-                print ("Codigo não pertence a Lista de Produtos selecionada")
-        return df3
+	def Teste2 (LinhaProduto):
+		for i in [LinhaProduto]:
+			if i in df.values:
+				df2 = df.loc[df['LinhaProduto'] == i]
+				df2.to_csv(r'C:\Users\divin\Downloads\Teste2.csv')
+			elif i == 'Todos':
+				df2 = df
+				df2.to_csv(r'C:\Users\divin\Downloads\Teste2_todos.csv')
+			else:
+				print ("Linha de Produto não existente")
+		return df2 
 
-    df3 = Teste3(Codigo)
+	df2 = Teste2(LinhaProduto)   
+	
+	def Teste3 (Codigo):
+		for j in [Codigo]:
+			if j in df2.values:
+				df3 = df2.loc[df2['Codigo'] == j]
+				#df3.to_csv(r'C:\Users\fgolo\Desktop\Teste\Teste3.csv')
+			elif j == 'Todos':
+				df3 = df2
+				#df3.to_csv(r'C:\Users\fgolo\Desktop\Teste\Teste3.csv')
+			else:
+				print ("Codigo não pertence a Lista de Produtos selecionada")
+		return df3
 
-    def Teste4 (CentroCusto):
-        for k in [CentroCusto]:
-            if k in df3.values:
-                df4 = df3.loc[df3['CentroCusto'] == k]
-                #df4.to_csv(r'C:\Users\fgolo\Desktop\Teste\Teste4.csv')
-            elif k == 'Todos':
-                df4 = df3
-                #df4.to_csv(r'C:\Users\fgolo\Desktop\Teste\Teste4.csv')
-            else:
-                print ("Centro de Custo não vendeu esse componente")
-        return df4
+	df3 = Teste3(Codigo)
 
-    df4 = Teste4(CentroCusto)
+	def Teste4 (CentroCusto):
+		for k in [CentroCusto]:
+			if k in df3.values:
+				df4 = df3.loc[df3['CentroCusto'] == k]
+				#df4.to_csv(r'C:\Users\fgolo\Desktop\Teste\Teste4.csv')
+			elif k == 'Todos':
+				df4 = df3
+				#df4.to_csv(r'C:\Users\fgolo\Desktop\Teste\Teste4.csv')
+			else:
+				print ("Centro de Custo não vendeu esse componente")
+		return df4
 
-    def Teste5 (Cliente):
-        for l in [Cliente]:
-            if l in df4.values:
-                df5 = df4.loc[df4['Cliente'] == l]
-                #df5.to_csv(r'C:\Users\fgolo\Desktop\Teste\Teste5.csv')
-            elif l == 'Todos':
-                df5 = df4
-                #df5.to_csv(r'C:\Users\fgolo\Desktop\Teste\Teste5.csv')
-            else:
-                print ("Cliente não comprou desse centro de custo")
-        return df5
-    
-    df5 = Teste5(Cliente)
+	df4 = Teste4(CentroCusto)
 
-    df6 = df5.groupby(['ano','ano-semana','Codigo','Cliente']).sum().reset_index()
-    df6 = df6.sort_values(by=['ano'])
+	def Teste5 (Cliente):
+		for l in [Cliente]:
+			if l in df4.values:
+				df5 = df4.loc[df4['Cliente'] == l]
+				#df5.to_csv(r'C:\Users\fgolo\Desktop\Teste\Teste5.csv')
+			elif l == 'Todos':
+				df5 = df4
+				#df5.to_csv(r'C:\Users\fgolo\Desktop\Teste\Teste5.csv')
+			else:
+				print ("Cliente não comprou desse centro de custo")
+		return df5
+	
+	df5 = Teste5(Cliente)
 
-    def semanaa (a,b):
-        semanaa = []
-        for i in range(2017,b):
-            i = str(i)
-            for j in range(1,a):
-                j = str(j)
-                j = j.zfill(2)
-                z = 'a' + i + 's' + j
-                semanaa.append(z)
-        return semanaa
+	df6 = df5.groupby(['ano','ano-semana','Codigo','Cliente']).sum().reset_index()
+	df6 = df6.sort_values(by=['ano'])
 
-    semanaa = semanaa(53,2021)
+	def semanaa (a,b):
+		semanaa = []
+		for i in range(2017,b):
+			i = str(i)
+			for j in range(1,a):
+				j = str(j)
+				j = j.zfill(2)
+				z = 'a' + i + 's' + j
+				semanaa.append(z)
+		return semanaa
 
-    def semana ():
-        semana = df6['ano-semana'].to_list()
-        for i in semanaa:
-            if i not in semana:
-                semana.append(i)
-            else:
-                pass
-        return semana
+	semanaa = semanaa(53,2021)
 
-    a = semana()
+	def semana ():
+		semana = df6['ano-semana'].to_list()
+		for i in semanaa:
+			if i not in semana:
+				semana.append(i)
+			else:
+				pass
+		return semana
 
-    def Teste6 (x):
-        semana = []
-        quantidade = []
-        cliente = []
-        z = 0
-        for i in a:
-            if i in df6.values:
-                x = df6.at[z,'Quantidade']
-                y = df6.at[z,'Cliente']
-                semana.append(i)
-                quantidade.append(x)
-                cliente.append(y)
-                z = z+1
-            else:
-                semana.append(i)
-                quantidade.append(0)
-                cliente.append ('')              
-                z = z+1
-        dfa = pd.DataFrame({'semana':semana,'cliente':cliente,'quantidade':quantidade})
-        dfa = dfa.sort_values(by='semana')
-        
-        return dfa 
-    
-    dfa = Teste6(a)
-    dfa = dfa.reset_index()
-    dfaa = dfa.groupby(['semana']).sum().reset_index()
-    dfaa = dfaa.sort_values(by='semana')
-    dfa['semana'] = dfa['semana'].str[5:8] + dfa['semana'].str[0:5]
-    suporte = dfa['semana'].to_list()
-    
-    #dfa.to_csv(r'C:\Users\fgolo\Desktop\Teste\TesteT.csv')
-    #dfaa.to_csv(r'C:\Users\fgolo\Desktop\Teste\TesteTT.csv')
+	a = semana()
 
-    fig = px.bar(dfa , x='semana' , y='quantidade' , color='cliente'  , category_orders={'semana':suporte},
-                 template='plotly_dark' , color_discrete_sequence=px.colors.sequential.Rainbow)
-    
-    fig2 = px.line(dfaa , x='semana' , y='quantidade' , category_orders={'semana':suporte} ,
-                   template='plotly_dark')
+	def Teste6 (x):
+		semana = []
+		quantidade = []
+		cliente = []
+		z = 0
+		for i in a:
+			if i in df6.values:
+				x = df6.at[z,'Quantidade']
+				y = df6.at[z,'Cliente']
+				semana.append(i)
+				quantidade.append(x)
+				cliente.append(y)
+				z = z+1
+			else:
+				semana.append(i)
+				quantidade.append(0)
+				cliente.append ('')              
+				z = z+1
+		dfa = pd.DataFrame({'semana':semana,'cliente':cliente,'quantidade':quantidade})
+		dfa = dfa.sort_values(by='semana')
+		
+		return dfa 
+	
+	dfa = Teste6(a)
+	dfa = dfa.reset_index()
+	dfaa = dfa.groupby(['semana']).sum().reset_index()
+	dfaa = dfaa.sort_values(by='semana')
+	dfa['semana'] = dfa['semana'].str[5:8] + dfa['semana'].str[0:5]
+	suporte = dfa['semana'].to_list()
+	
+	#dfa.to_csv(r'C:\Users\fgolo\Desktop\Teste\TesteT.csv')
+	#dfaa.to_csv(r'C:\Users\fgolo\Desktop\Teste\TesteTT.csv')
 
-    st.write(fig)
-    st.write(fig2)
+	fig = px.bar(dfa , x='semana' , y='quantidade' , color='cliente'  , category_orders={'semana':suporte},
+				 template='plotly_dark' , color_discrete_sequence=px.colors.sequential.Rainbow)
+	
+	fig2 = px.line(dfaa , x='semana' , y='quantidade' , category_orders={'semana':suporte} ,
+				   template='plotly_dark')
+
+	st.write(fig)
+	st.write(fig2)
 
 def predicao_fernando():
 
-	st_linhaproduto = st.sidebar.number_input('Selecione a linha do produto', value=0, min_value = 0, max_value = 999, step=1)
-	st_codigoproduto = st.sidebar.number_input('Selecione o codigo do produto', value=0, min_value = 0, max_value = 999, step=1)
-	st_cliente = st.sidebar.number_input('Selecione o cliente', value=0, min_value = 0, max_value = 999, step=1)
+	#df = pd.read_csv('./Datasets/1-Vendas_Integrador_100Vies-Rev1.csv')
+	#st_linhaproduto = st.sidebar.multiselect('Selecione a linha do produto', df['LinhaProduto'].unique())
+	#st_codproduto = st.sidebar.multiselect('Selecione o código do produto', df['Codigo'].unique())
+	#st_cliente = st.sidebar.multiselect('Selecione o cliente', df['Cliente'].unique())
 
-	#st_linhaproduto = st.sidebar.multiselect('Selecione a linha do produto', [0,1,2,3,"Todos"],0)
-	#st_codigoproduto = st.sidebar.multiselect('Selecione o codigo do produto', 0,[1,2,3,"Todos"],0)
-	#st_cliente = st.sidebar.multiselect('Selecione o cliente', [0,1,2,3,"Todos"],0)
-	
-	Teste('Todos','Todos',21320,'Todos')
-	#Teste(st_linhaproduto,st_codigoproduto,21320,st_cliente)
-def predicao_mario():
+
+	if st.sidebar.checkbox("Selecionar linha do produto?",value=True):
+		#st_linhaproduto = st.sidebar.number_input('Selecione a linha do produto', value=1,min_value = 1, max_value = 201, step=1)
+		st_linhaproduto = st.sidebar.number_input('Selecione a linha do produto',min_value = 1, max_value = 201, step=1)
+	else:
+		st_linhaproduto = 'Todos'
+
+	if st.sidebar.checkbox("Selecionar código do produto?",value=True):
+		#st_codproduto = st.sidebar.text_input('Selecione o codigo do produto', value='A0000180133')
+		st_codproduto = st.sidebar.text_input('Selecione o codigo do produto')
+	else:
+		st_codproduto = 'Todos'
+
+	if st.sidebar.checkbox("Selecionar cliente?",value=True):
+		#st_cliente = st.sidebar.number_input('Selecione o cliente', value=1, min_value = 1, max_value = 999, step=1)
+		st_cliente = st.sidebar.number_input('Selecione o cliente', min_value = 1, max_value = 999, step=1)
+	else:
+		st_cliente = 'Todos'
+
+	#st_codproduto = st.sidebar.text_input('Selecione o codigo do produto')
+	#st_cliente = st.sidebar.text_input('Selecione o cliente')
+
+	#	if st_linhaproduto != '' and st_linhaproduto != 'Todos':
+	#		st_linhaproduto == int(st_linhaproduto)
+	#	elif st_codproduto != '' and st_codproduto != 'Todos':
+	#		st_codproduto == int(st_codproduto)
+	#	elif st_cliente != '' and st_cliente != 'Todos':
+	#		st_cliente == int(st_cliente)
+
+	if st_linhaproduto != '' and st_codproduto != '' and st_cliente != '':
+		#Teste('Todos','Todos',21320,'Todos')
+		#Teste(1,'A0000180133',21320,1)
+		#print ("Linha de Produto = ", st_linhaproduto)
+
+		Teste(st_linhaproduto,st_codproduto,21320,st_cliente)
+
+def predicao_mario(f_produto):
 	#IMPORTANDO BIBLIOTECAS
 	import warnings
 	warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -327,7 +353,6 @@ def predicao_mario():
 	from sklearn import metrics
 	from sklearn.model_selection import train_test_split
 	import pandas as pd
-	import matplotlib.pyplot as plt
 	import seaborn as sns
 	import numpy as np
 	import plotly
@@ -369,19 +394,37 @@ def predicao_mario():
 			'xtick.labelsize':'x-large',
 			'ytick.labelsize':'x-large'}
 
-	#%matplotlib inline
+	#get_ipython().run_line_magic('matplotlib', 'inline')
 	plt.rcParams.update(params)
 
-	import plotly_express as px
 
-	#IMPORTAÇÃO DO DATASET DE VENDAS
+	# In[3]:
+
+
+	# # IMPORTAÇÃO DO DATASET DE VENDAS
+
+	# In[4]:
+
+
 	vendastelepweek=pd.read_csv("./Datasets/4-VendasTelepWeek-Rev3.csv",sep=',',encoding='Latin1')
+	vendastelepweek.head()
+
+
+	# In[5]:
+
+
 	melt = vendastelepweek.melt(id_vars='Codigo', var_name='Week',value_name='Vendas')
 	melt = melt.sort_values(['Week','Codigo']).reset_index(drop=True)
 	melt['Week'] = melt['Week'].astype(int)
 	melt = melt.sort_values(['Week','Codigo']).reset_index(drop=True)
+	#melt.head(2)
 
-	#FEATURE ENGINEERING 1: MESES DO ANO
+
+	# # FEATURE ENGINEERING 1: MESES DO ANO
+
+	# In[6]:
+
+
 	Jan = []
 	for w in melt['Week']:
 		if (w<=4) or (w>=52 and w<=56)or (w>=104):
@@ -498,24 +541,50 @@ def predicao_mario():
 		Dez.append(dez)
 	melt['Dez'] = Dez
 
-	#CÁCULO DA MÉDIA E DESVIO PADRÃO DE CADA PRODUTO
+	#melt.head()
+
+
+	# # NORMALIZAÇÃO DA VARIÁVEL TARGET 'VENDAS'
+	# ( VENDA - MEDIA ) / DESVIO --> PRODUTO A PRODUTO
+
+	# ## CÁCULO DA MÉDIA E DESVIO PADRÃO DE CADA PRODUTO
+
+	# In[7]:
+
+
 	media = []
 	desvio = []
 
-	for c in melt['Codigo']:
-		med = melt[melt['Codigo'] == c]['Vendas'].mean()
+	for var_produto in melt['Codigo']:
+		med = melt[melt['Codigo'] == var_produto]['Vendas'].mean()
 		media.append(med)
 		
-		dev = melt[melt['Codigo'] == c]['Vendas'].std()
+		dev = melt[melt['Codigo'] == var_produto]['Vendas'].std()
 		desvio.append(dev)
+
+
+	# In[8]:
+
 
 	melt['Media'] = pd.Series(media)
 	melt['Desvio'] = pd.Series(desvio)
 
-	#NORMALIZAÇÃO DA VARIÁVEL TARGET 'VENDAS'
-	melt['VendasStd'] = (melt['Vendas']-melt['Media'])/melt['Desvio']
 
-	#FEATURE ENGINEERING 2: LAG (1 - 4), DIFF (1 - 4)
+	# ## NORMALIZAÇÃO DA VARIÁVEL TARGET 'VENDAS''
+	# ( VENDA - MEDIA ) / DESVIO --> PRODUTO A PRODUTO
+
+	# In[9]:
+
+
+	melt['VendasStd'] = (melt['Vendas']-melt['Media'])/melt['Desvio']
+	#melt.head()
+
+
+	# # FEATURE ENGINEERING 2: LAG (1 - 4), DIFF (1 - 4)
+
+	# In[10]:
+
+
 	melt['VendasStd_Diff1'] = round(melt.groupby(['Codigo'])['VendasStd'].diff(),4)
 	melt['VendasStd_Diff2'] = round(melt.groupby(['Codigo'])['VendasStd'].diff(2),4)
 	melt['VendasStd_Diff3'] = round(melt.groupby(['Codigo'])['VendasStd'].diff(3),4)
@@ -526,11 +595,28 @@ def predicao_mario():
 	melt['VendasStd_Lag3'] = round(melt.groupby(['Codigo'])['VendasStd'].shift(3),4)
 	melt['VendasStd_Lag4'] = round(melt.groupby(['Codigo'])['VendasStd'].shift(4),4)
 
-	#BASELINE - LASTWEEK - LAG(1)
+	melt[melt['Codigo']==1].tail()
+
+
+	# # BASELINE - LASTWEEK - LAG(1)
+	# MAE = 0.66842
+
+	# In[11]:
+
+
 	melt['VendasStd_Lag1'] = melt.groupby(['Codigo'])['VendasStd'].shift()
+	#melt.head(2)
+
+
+	# In[12]:
+
 
 	def rmse (ytrue,ypred):
 		return np.sqrt(mean_squared_error(ytrue,ypred))
+
+
+	# In[13]:
+
 
 	mean_error = []
 	for week in range(84,109):                #31/12/2019 - 24 semanas - 6 meses
@@ -540,18 +626,31 @@ def predicao_mario():
 		p = val['VendasStd_Lag1'].values
 		
 		error = mae(val['VendasStd'].values, p)
-		print('Week %d - Error %.5f' % (week, error))
+		#print('Week %d - Error %.5f' % (week, error))
 		mean_error.append(error)
+	#print('Mean Absolute Error = %.5f' % np.mean(mean_error))
 
-	prod= melt[melt['Codigo']==1]
+
+	# In[14]:
+
+
+	#prod= melt[melt['Codigo']==1]
 	# multiple line plot
-	plt.plot( 'Week', 'VendasStd', data=prod, marker='', markerfacecolor='blue', markersize=12, color='green', linewidth=3,label="True")
-	plt.plot( 'Week', 'VendasStd_Lag1', data=prod, marker='', color='red', linewidth=1,label="Predict",linestyle='dashed')
-	plt.legend()
-	plt.title('BASELINE: Predict = VendasStd_Lag1\nMean Absolute Error = %.5f' % np.mean(mean_error))
+	#plt.plot( 'Week', 'VendasStd', data=prod, marker='', markerfacecolor='blue', markersize=12, color='green', linewidth=3,label="True")
+	#plt.plot( 'Week', 'VendasStd_Lag1', data=prod, marker='', color='red', linewidth=1,label="Predict",linestyle='dashed')
+	#plt.legend()
+	#plt.title('BASELINE: Predict = VendasStd_Lag1\nMean Absolute Error = %.5f' % np.mean(mean_error))
+	
+	#st.pyplot(plt)
+
+	# # 1o MODELO: RANDOM FOREST REGRESSOR
+	# PRODUTO A PRODUTO
+	# 
+	# MAE: 0.30068
+
+	# In[15]:
 
 
-	#1o MODELO: RANDOM FOREST REGRESSOR
 	def timeseries_train_test_split(X, y, test_size):
 		"""
 			Perform train-test split with respect to time series structure
@@ -566,11 +665,13 @@ def predicao_mario():
 		y_test = y.iloc[test_index:]
 		
 		return X_train, X_test, y_train, y_test
-	
-	#COMPARAÇÃO ENTRE OS MODELOS: RFR x LGBM
-	st_produto = st.sidebar.number_input('Escolha um Código de Produto [entre 1 e 201]: ', value=1, min_value = 1, max_value = 201, step=1)
 
-	prod = melt[melt['Codigo'] == st_produto]
+
+	#c = int(input('Escolha um Código de Produto [entre 1 e 201]: '))
+	#st_produto = st.sidebar.number_input('Escolha um Código de Produto [entre 1 e 201]: ', value=0, min_value = 0, max_value = 201, step=1)
+	var_produto = f_produto
+
+	prod = melt[melt['Codigo'] == var_produto]
 	prod = prod.drop(['Vendas'],axis=1)
 	y = prod.dropna().VendasStd
 	X = prod.dropna().drop(['VendasStd'], axis=1)
@@ -579,7 +680,7 @@ def predicao_mario():
 	#Random Forest Regressor:
 	rfr = RandomForestRegressor(n_estimators=1000, n_jobs=-1, random_state=0)
 	rfr.fit(X_train, y_train)
-	p_RFR = mdl.predict(X_test)
+	p_RFR = rfr.predict(X_test)
 	MAE_RFR = mae(y_test, p_RFR)
 
 	X_test_RFR = X_test.copy()
@@ -611,13 +712,24 @@ def predicao_mario():
 	plt.plot( 'Week', 'Predict_True', data=X_test_RFR, marker='', color='blue', linewidth=1,label="Predict_RFR",linestyle='dashed')
 	plt.plot( 'Week', 'Predict_True', data=X_test_LGBM, marker='', color='red', linewidth=1,label="Predict_LGBM",linestyle='dashed')
 	plt.legend()
-	plt.title('Codigo %d - LGBM: Predict x True\n MAE RFR: %.5f\nMAE LGBM: %.5f' % (c, MAE_RFR,MAE_LGBM))
+	plt.title('Codigo %d - LGBM: Predict x True\n MAE RFR: %.5f\nMAE LGBM: %.5f' % (var_produto, MAE_RFR,MAE_LGBM))
 
-	#SHAP VALUES
+	st.pyplot(plt)
+
+
+	# # SHAP VALUES
+
+	# In[ ]:
+
+
 	import shap
 	shap.initjs()
 
-	prod = melt[melt['Codigo'] == st_produto]
+	#c = int(input('Escolha um Código de Produto [entre 1 e 201]: '))
+
+	var_produto = f_produto
+
+	prod = melt[melt['Codigo'] == var_produto]
 	prod = prod.drop(['Vendas'],axis=1)
 	y = prod.dropna().VendasStd
 	X = prod.dropna().drop(['VendasStd'], axis=1)
@@ -625,8 +737,12 @@ def predicao_mario():
 
 	import shap
 	shap_values = shap.TreeExplainer(rfr).shap_values(X_train)
-	shap.summary_plot(shap_values, X_train, plot_type="bar")
-	shap.summary_plot(shap_values, X_train)
+	print('Codigo %d - Shap Value - Features Explainer' % (var_produto))
+	#shap.summary_plot(shap_values, X_train, plot_type="bar")
+	#shap.summary_plot(shap_values, X_train)
+	st.write(shap.summary_plot(shap_values, X_train, plot_type="bar"))
+	st.write(shap.summary_plot(shap_values, X_train))
+	#st.pyplot.shap.summary_plot(shap_values, X_train, plot_type="bar")
 
 if __name__ == '__main__':
 	main()
