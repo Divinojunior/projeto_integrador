@@ -180,10 +180,10 @@ def Teste (LinhaProduto,Codigo,CentroCusto,Cliente):
 		for i in [LinhaProduto]:
 			if i in df.values:
 				df2 = df.loc[df['LinhaProduto'] == i]
-				df2.to_csv(r'C:\Users\divin\Downloads\Teste2.csv')
+				#df2.to_csv(r'C:\Users\divin\Downloads\Teste2.csv')
 			elif i == 'Todos':
 				df2 = df
-				df2.to_csv(r'C:\Users\divin\Downloads\Teste2_todos.csv')
+				#df2.to_csv(r'C:\Users\divin\Downloads\Teste2_todos.csv')
 			else:
 				print ("Linha de Produto não existente")
 		return df2 
@@ -311,13 +311,13 @@ def predicao_fernando():
 
 	if st.sidebar.checkbox("Selecionar linha do produto?",value=True):
 		#st_linhaproduto = st.sidebar.number_input('Selecione a linha do produto', value=1,min_value = 1, max_value = 201, step=1)
-		st_linhaproduto = st.sidebar.number_input('Selecione a linha do produto', value=0, min_value = 0, max_value = 201, step=1)
+		st_linhaproduto = st.sidebar.number_input('Selecione a linha do produto [entre 1 e 2]', value=0, min_value = 0, max_value = 201, step=1)
 	else:
 		st_linhaproduto = 'Todos'
 
 	if st.sidebar.checkbox("Selecionar código do produto?",value=True):
 		#st_codproduto = st.sidebar.text_input('Selecione o codigo do produto', value='A0000180133')
-		st_codproduto = st.sidebar.text_input('Selecione o codigo do produto')
+		st_codproduto = st.sidebar.number_input('Selecione o codigo do produto [entre 1 e 201]', value=0, min_value = 0, max_value = 201, step=1)
 	else:
 		st_codproduto = 'Todos'
 
@@ -337,7 +337,7 @@ def predicao_fernando():
 	#	elif st_cliente != '' and st_cliente != 'Todos':
 	#		st_cliente == int(st_cliente)
 
-	if st_linhaproduto != 0 and st_codproduto != '' and st_cliente != 0:
+	if st_linhaproduto != 0 and st_codproduto != 0 and st_cliente != 0:
 		#Teste('Todos','Todos',21320,'Todos')
 		#Teste(1,'A0000180133',21320,1)
 		#print ("Linha de Produto = ", st_linhaproduto)
