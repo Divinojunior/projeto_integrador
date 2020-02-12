@@ -28,16 +28,16 @@ def main():
 	
 	st.markdown(html_temp,unsafe_allow_html=True)
 	
-	page = st.sidebar.selectbox("Escolha uma página", ["Visualização do dataset","Fernando","Mario"])
+	page = st.sidebar.selectbox("Escolha uma página", ["Visualização dos dados","Histórico de vendas","Predição por ML"])
 	
-	if page == "Visualização do dataset":
+	if page == "Visualização dos dados":
 		st.header("Explore aqui o seu Dataset")
 		visualize_data()
-	elif page == "Fernando":
-		st.title('Prevendo a quantidade de peças - Fernando')
+	elif page == "Histórico de vendas":
+		st.title('Histórico de vendas')
 		predicao_fernando()
-	elif page == "Mario":
-		st.title('Prevendo a quantidade de peças - Mário')
+	elif page == "Predição por ML":
+		st.title('Prevendo a quantidade de peças')
 		st_produto = st.sidebar.number_input('Escolha um Código de Produto [entre 1 e 201]: ', value=0, min_value = 0, max_value = 201, step=1)
 		if st_produto != 0:
 			predicao_mario(st_produto)
@@ -57,18 +57,18 @@ def visualize_data():
 	df = pd.read_csv(filename)
 
 	# Mostrar conjunto de dados
-	if st.checkbox("Mostrar conjunto de dados"):
+	if st.checkbox("Exibir dataset"):
 		number = st.number_input("Número de linhas para exibir",1,200)
 		st.dataframe(df.head(number))
 
 	
 	# Mostrar colunas
-	if st.button("Nomes das colunas"):
-		st.write(df.columns)
+	#if st.button("Nomes das colunas"):
+	#	st.write(df.columns)
 
 	# Mostrar Forma
-	if st.checkbox("Forma do conjunto de dados"):
-		data_dim = st.radio("Mostrar dimensão por",("Linhas","Colunas"))
+	if st.checkbox("Dimensões do dataset"):
+		data_dim = st.radio("",("Linhas","Colunas"))
 		if data_dim == 'Linhas':
 			st.text("Numero de linhas")
 			st.write(df.shape[0])
@@ -79,27 +79,27 @@ def visualize_data():
 			st.write(df.shape)
 
 	# Select Columns
-	if st.checkbox("Selecionar colunas para mostrar"):
+	if st.checkbox("Selecionar colunas a serem exibidas"):
 		all_columns = df.columns.tolist()
 		selected_columns = st.multiselect("Selecione",all_columns)
 		new_df = df[selected_columns]
 		st.dataframe(new_df)
 
 	# Mostrar valores
-	if st.button("Contagens de valor"):
-		st.text("Contagens de valor por destino / classe")
-		st.write(df.iloc[:,-1].value_counts())
+	if st.button("Ranking de vendas"):
+		st.text("Quantidade de vendas por produto")
+		st.write(df.iloc[:,1].value_counts())
 	
 	# Mostrar tipos de dados
-	if st.button("Tipos de dados"):
+	if st.button("Tipos de dados das features"):
 		st.write(df.dtypes)
 	
 	# Mostrar Resumo
-	if st.checkbox("Resumo"):
+	if st.checkbox("Estatística descritiva das features"):
 		st.write(df.describe().T)
 
 	# Gráfico e visualização
-	st.subheader("Visualização de dados")
+	st.subheader("Gráficos")
 	# Correlação
 	# Seaborn Plot
 	if st.checkbox("Gráfico de Correlação [Seaborn]"):
@@ -107,11 +107,10 @@ def visualize_data():
 		st.pyplot()
 
 	# Contagem
-	if st.checkbox("Gráfico de contagens de valor"):
-		st.text("Contagens de valor por destino")
+	if st.checkbox("Gráfico personalizável"):
 		all_columns_names = df.columns.tolist()
-		primary_col = st.selectbox("Coluna Primária a Agrupar",all_columns_names)
-		selected_columns_names = st.multiselect("Selecionar colunas",all_columns_names)
+		primary_col = st.selectbox("Agrupar por ",all_columns_names)
+		selected_columns_names = st.multiselect("Feature a ser visualizada",all_columns_names)
 		if st.button("Gráfico"):
 			st.text("Gerar Gráfico")
 			if selected_columns_names:
@@ -121,34 +120,6 @@ def visualize_data():
 			st.write(vc_plot.plot(kind="bar"))
 			st.pyplot()
 
-	# Gráfico personalizável
-
-	st.subheader("Gráfico personalizável")
-	all_columns_names = df.columns.tolist()
-	type_of_plot = st.selectbox("Selecione o tipo de plotagem",["area","bar","line","hist","box","kde"])
-	selected_columns_names = st.multiselect("Selecionar colunas a serem plotadas",all_columns_names)
-
-	if st.button("Gerar Gráfico"):
-		st.success("Gerando plotagem personalizável de {} para {}".format(type_of_plot,selected_columns_names))
-
-		# Plot por Streamlit
-		if type_of_plot == 'area':
-			cust_data = df[selected_columns_names]
-			st.area_chart(cust_data)
-
-		elif type_of_plot == 'bar':
-			cust_data = df[selected_columns_names]
-			st.bar_chart(cust_data)
-
-		elif type_of_plot == 'line':
-			cust_data = df[selected_columns_names]
-			st.line_chart(cust_data)
-
-		# Gráfico personalizado
-		elif type_of_plot:
-			cust_plot= df[selected_columns_names].plot(kind=type_of_plot)
-			st.write(cust_plot)
-			st.pyplot()
 
 	if st.button("Obrigado"):
 		st.balloons()
@@ -158,10 +129,10 @@ def Teste (LinhaProduto,Codigo,CentroCusto,Cliente):
 	import pandas as pd
 	import plotly.express as px 
 
-	#x = input('1-Vendas_Integrador_100Vies-Rev1.csv')
-	#meu endereço - C:\Users\fgolo\Desktop\Integrador\1-Vendas_Integrador_100Vies-Rev1.csv
+	#x = input('1-Vendas_Integrador_100Vies-Rev2.csv')
+	#meu endereço - C:\Users\fgolo\Desktop\Integrador\1-Vendas_Integrador_100Vies-Rev2.csv
 
-	df = pd.read_csv('./Datasets/1-Vendas_Integrador_100Vies-Rev1.csv')
+	df = pd.read_csv('./Datasets/1-Vendas_Integrador_100Vies-Rev2.csv')
 
 	df['ano'] = df['DataVenda'].str[6:10]
 	df['mes'] = df['DataVenda'].str[3:5]
@@ -303,7 +274,7 @@ def Teste (LinhaProduto,Codigo,CentroCusto,Cliente):
 
 def predicao_fernando():
 
-	#df = pd.read_csv('./Datasets/1-Vendas_Integrador_100Vies-Rev1.csv')
+	#df = pd.read_csv('./Datasets/1-Vendas_Integrador_100Vies-Rev2.csv')
 	#st_linhaproduto = st.sidebar.multiselect('Selecione a linha do produto', df['LinhaProduto'].unique())
 	#st_codproduto = st.sidebar.multiselect('Selecione o código do produto', df['Codigo'].unique())
 	#st_cliente = st.sidebar.multiselect('Selecione o cliente', df['Cliente'].unique())
