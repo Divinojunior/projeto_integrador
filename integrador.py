@@ -28,7 +28,7 @@ def main():
 	
 	st.markdown(html_temp,unsafe_allow_html=True)
 	
-	page = st.sidebar.selectbox("Escolha uma página", ["Visualização dos dados","Histórico de vendas","Predição por ML"])
+	page = st.sidebar.selectbox("Escolha uma página", ["Visualização dos dados","Histórico de vendas","Predição por ML (Visão Cientista de Dados)","Predição por ML (Visão Business)"])
 	
 	if page == "Visualização dos dados":
 		st.header("Explore aqui o seu Dataset")
@@ -36,12 +36,18 @@ def main():
 	elif page == "Histórico de vendas":
 		st.title('Histórico de vendas')
 		predicao_fernando()
-	elif page == "Predição por ML":
-		st.title('Prevendo a quantidade de peças')
-		st_estimator = st.sidebar.number_input('Defina o n_estimator para o modelo Randon Forest Regressor [100, 500 ou 1000]: ', value=1000, min_value = 100, max_value = 1000, step=100)
+	elif page == "Predição por ML (Visão Cientista de Dados)":
+		st.title('Prevendo a demanda por produto')
+		st_estimator = st.sidebar.number_input('Defina o n_estimator para o modelo Randon Forest Regressor [10, 30, 100, 300 ou 1000]: ', value=1000, min_value = 10, max_value = 1000, step=100)
+		st_max_depth = st.sidebar.number_input('Defina o max_depth o modelo Randon Forest Regressor [5, 15, 30, 100 ou 300]: ', value=5, min_value = 5, max_value = 300, step=10)
 		st_produto = st.sidebar.number_input('Escolha um Código de Produto [entre 1 e 201]: ', value=0, min_value = 0, max_value = 201, step=1)
-		if st_produto != 0 and (st_estimator == 100 or st_estimator == 500 or st_estimator == 1000):
-			predicao_mario(st_produto, st_estimator)
+		if st_produto != 0 and (st_estimator in (10,30,100,300,1000)):
+			predicao_mario(st_produto, st_estimator, st_max_depth)
+	elif page == "Predição por ML (Visão Business)":
+		st.title('Prevendo a demanda por produto')
+		st_produto = st.sidebar.number_input('Escolha um Código de Produto [entre 1 e 201]: ', value=0, min_value = 0, max_value = 201, step=1)
+		if st_produto != 0:
+			predicao_mario(st_produto, 1000, 5)
 
 def visualize_data():
 
@@ -316,7 +322,7 @@ def predicao_fernando():
 
 		Teste(st_linhaproduto,st_codproduto,21320,st_cliente)
 
-def predicao_mario(f_produto,f_estimator):
+def predicao_mario(f_produto,f_estimator,f_max_depth):
 	#IMPORTANDO BIBLIOTECAS
 	import warnings
 	warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -650,7 +656,7 @@ def predicao_mario(f_produto,f_estimator):
 	X_train, X_test, y_train, y_test = timeseries_train_test_split(X, y, test_size=0.3)
 
 	#Random Forest Regressor:
-	rfr = RandomForestRegressor(n_estimators=f_estimator, n_jobs=-1, random_state=0)
+	rfr = RandomForestRegressor(n_estimators=f_estimator, max_depth=f_max_depth, n_jobs=-1, random_state=0)
 	rfr.fit(X_train, y_train)
 	p_RFR = rfr.predict(X_test)
 	MAE_RFR = mae(y_test, p_RFR)
@@ -665,7 +671,7 @@ def predicao_mario(f_produto,f_estimator):
 	X_test_RFR['MAE_True'] = abs(X_test_RFR['Vendas_True'] - X_test_RFR['Predict_True'])
 
 	#LGBM
-	lgbm = LGBMRegressor(n_estimators=500, learning_rate=0.01)
+	lgbm = LGBMRegressor(n_estimators=f_estimator, learning_rate=0.01)
 	lgbm.fit(X_train, y_train)
 	p_LGBM = lgbm.predict(X_test)
 	MAE_LGBM = mae(y_test,p_LGBM)
@@ -694,8 +700,8 @@ def predicao_mario(f_produto,f_estimator):
 	# In[ ]:
 
 
-	import shap
-	shap.initjs()
+	#import shap
+	#shap.initjs()
 
 	#c = int(input('Escolha um Código de Produto [entre 1 e 201]: '))
 
@@ -707,7 +713,7 @@ def predicao_mario(f_produto,f_estimator):
 	X = prod.dropna().drop(['VendasStd'], axis=1)
 	X_train, X_test, y_train, y_test = timeseries_train_test_split(X, y, test_size=0.3)
 
-	import shap
+	#import shap
 	#shap_values = shap.TreeExplainer(rfr).shap_values(X_train)
 	#print('Codigo %d - Shap Value - Features Explainer' % (var_produto))
 	#shap.summary_plot(shap_values, X_train, plot_type="bar")
