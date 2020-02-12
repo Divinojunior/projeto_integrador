@@ -678,7 +678,7 @@ def predicao_mario(f_produto,f_estimator,f_max_depth):
 	X_test_RFR['MAE_True'] = abs(X_test_RFR['Vendas_True'] - X_test_RFR['Predict_True'])
 
 	#LGBM
-	lgbm = LGBMRegressor(n_estimators=f_estimator, learning_rate=0.01)
+	lgbm = LGBMRegressor(n_estimators=500, learning_rate=0.01)
 	lgbm.fit(X_train, y_train)
 	p_LGBM = lgbm.predict(X_test)
 	MAE_LGBM = mae(y_test,p_LGBM)
