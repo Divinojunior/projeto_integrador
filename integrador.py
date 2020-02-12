@@ -38,9 +38,10 @@ def main():
 		predicao_fernando()
 	elif page == "Predição por ML":
 		st.title('Prevendo a quantidade de peças')
+		st_estimator = st.sidebar.number_input('Defina o n_estimator para o modelo Randon Forest Regressor [100, 500 ou 1000]: ', value=1000, min_value = 100, max_value = 1000, step=100)
 		st_produto = st.sidebar.number_input('Escolha um Código de Produto [entre 1 e 201]: ', value=0, min_value = 0, max_value = 201, step=1)
-		if st_produto != 0:
-			predicao_mario(st_produto)
+		if st_produto != 0 and (st_estimator == 100 or st_estimator == 500 or st_estimator == 1000):
+			predicao_mario(st_produto, st_estimator)
 
 def visualize_data():
 
@@ -315,7 +316,7 @@ def predicao_fernando():
 
 		Teste(st_linhaproduto,st_codproduto,21320,st_cliente)
 
-def predicao_mario(f_produto):
+def predicao_mario(f_produto,f_estimator):
 	#IMPORTANDO BIBLIOTECAS
 	import warnings
 	warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -649,7 +650,7 @@ def predicao_mario(f_produto):
 	X_train, X_test, y_train, y_test = timeseries_train_test_split(X, y, test_size=0.3)
 
 	#Random Forest Regressor:
-	rfr = RandomForestRegressor(n_estimators=1000, n_jobs=-1, random_state=0)
+	rfr = RandomForestRegressor(n_estimators=f_estimator, n_jobs=-1, random_state=0)
 	rfr.fit(X_train, y_train)
 	p_RFR = rfr.predict(X_test)
 	MAE_RFR = mae(y_test, p_RFR)
@@ -707,12 +708,12 @@ def predicao_mario(f_produto):
 	X_train, X_test, y_train, y_test = timeseries_train_test_split(X, y, test_size=0.3)
 
 	import shap
-	shap_values = shap.TreeExplainer(rfr).shap_values(X_train)
-	print('Codigo %d - Shap Value - Features Explainer' % (var_produto))
+	#shap_values = shap.TreeExplainer(rfr).shap_values(X_train)
+	#print('Codigo %d - Shap Value - Features Explainer' % (var_produto))
 	#shap.summary_plot(shap_values, X_train, plot_type="bar")
 	#shap.summary_plot(shap_values, X_train)
-	st.write(shap.summary_plot(shap_values, X_train, plot_type="bar"))
-	st.write(shap.summary_plot(shap_values, X_train))
+	#st.write(shap.summary_plot(shap_values, X_train, plot_type="bar"))
+	#st.write(shap.summary_plot(shap_values, X_train))
 	#st.pyplot.shap.summary_plot(shap_values, X_train, plot_type="bar")
 
 if __name__ == '__main__':
