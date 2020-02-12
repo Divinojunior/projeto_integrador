@@ -28,7 +28,9 @@ def main():
 	
 	st.markdown(html_temp,unsafe_allow_html=True)
 	
-	page = st.sidebar.selectbox("Escolha uma página", ["Visualização dos dados","Histórico de vendas","Predição por ML (Visão Cientista de Dados)","Predição por ML (Visão Business)"])
+	page = st.sidebar.selectbox("Escolha uma página", ["Visualização dos dados",
+                                "Histórico de vendas","Predição por ML (Visão Cientista de Dados)",
+                                "Predição por ML (Visão Business)","Predição por NPL (Visão Business)"])
 	
 	if page == "Visualização dos dados":
 		st.header("Explore aqui o seu Dataset")
@@ -48,6 +50,11 @@ def main():
 		st_produto = st.sidebar.number_input('Escolha um Código de Produto [entre 1 e 201]: ', value=0, min_value = 0, max_value = 201, step=1)
 		if st_produto != 0:
 			predicao_mario(st_produto, 1000, 5)
+	elif page == "Predição por ARIMA (Visão Business)":
+		st.title('Prevendo a demanda por produto')
+		st_produto = st.sidebar.number_input('Escolha um Código de Produto [entre 1 e 201]: ', value=0, min_value = 0, max_value = 201, step=1)
+		if st_produto != 0:
+			predicao_thiago(st_produto)
 
 def visualize_data():
 
@@ -136,10 +143,10 @@ def Teste (LinhaProduto,Codigo,CentroCusto,Cliente):
 	import pandas as pd
 	import plotly.express as px 
 
-	#x = input('1-Vendas_Integrador_100Vies-Rev2.csv')
-	#meu endereço - C:\Users\fgolo\Desktop\Integrador\1-Vendas_Integrador_100Vies-Rev2.csv
+	#x = input('1-Vendas_Integrador_100Vies-Rev3.csv')
+	#meu endereço - C:\Users\fgolo\Desktop\Integrador\1-Vendas_Integrador_100Vies-Rev3.csv
 
-	df = pd.read_csv('./Datasets/1-Vendas_Integrador_100Vies-Rev2.csv')
+	df = pd.read_csv('./Datasets/1-Vendas_Integrador_100Vies-Rev3.csv')
 
 	df['ano'] = df['DataVenda'].str[6:10]
 	df['mes'] = df['DataVenda'].str[3:5]
@@ -281,7 +288,7 @@ def Teste (LinhaProduto,Codigo,CentroCusto,Cliente):
 
 def predicao_fernando():
 
-	#df = pd.read_csv('./Datasets/1-Vendas_Integrador_100Vies-Rev2.csv')
+	#df = pd.read_csv('./Datasets/1-Vendas_Integrador_100Vies-Rev3.csv')
 	#st_linhaproduto = st.sidebar.multiselect('Selecione a linha do produto', df['LinhaProduto'].unique())
 	#st_codproduto = st.sidebar.multiselect('Selecione o código do produto', df['Codigo'].unique())
 	#st_cliente = st.sidebar.multiselect('Selecione o cliente', df['Cliente'].unique())
@@ -721,6 +728,78 @@ def predicao_mario(f_produto,f_estimator,f_max_depth):
 	#st.write(shap.summary_plot(shap_values, X_train, plot_type="bar"))
 	#st.write(shap.summary_plot(shap_values, X_train))
 	#st.pyplot.shap.summary_plot(shap_values, X_train, plot_type="bar")
+
+def predicao_thiago(f_produto):
+    import pandas as pd
+    import numpy as np
+    import matplotlib.pylab as plt
+    # %matplotlib inline
+    from matplotlib.pylab import rcParams
+
+    import warnings
+    from statsmodels.tsa.arima_model import ARIMA
+    from sklearn.metrics import mean_absolute_error
+    rcParams['figure.figsize'] = 15, 6
+
+    data = pd.read_csv('./Datasets/4-VendasTelepWeek-Rev3.csv', delimiter = ',')
+
+    #Substiuir o numero pela variavel do Codigo do Produto
+    Codigo_produto = f_produto
+
+    #Periodo
+    Semana_ini = 26 #inicio de 2018
+    Semana_fim = 110 #final do dataset - Predic 5 semana pra tras
+
+
+    #Preparando os dados
+    df = data.loc[data['Codigo'] == Codigo_produto]
+    df1 = df.T.reset_index()
+    df1.columns = ["Semana","Quantidade"]
+
+    #Dataset para predict
+    ts = df1[1:][Semana_ini:Semana_fim-5] #reduzindo 5 semanas para comparar com o semana real.
+    ts = ts['Quantidade'].values.astype(int)
+    ts = pd.Series(ts)
+
+    #Dataset para comparacao real
+    ts2 = df1[1:][Semana_ini:Semana_fim]
+    ts2 = ts2['Quantidade'].values.astype(int)
+    ts2 = pd.Series(ts2)
+
+    #Funcao para inversao
+    def inverse_difference(history, yhat, interval=1):
+        return yhat + history[-interval]
+    weeks_in_year = 52
+
+
+    #model:
+    model = ARIMA(ts, order=(1, 1, 0))  
+    results = model.fit(disp=-1) 
+
+    #Forecast para 12 semanas
+    forecast = results.forecast(steps=12)[0]
+
+    # invert the differenced forecast to something usable
+    history = [x for x in ts.values]
+
+    week = 1
+    for yhat in forecast:
+        inverted = inverse_difference(history, yhat, weeks_in_year)
+        #print('Semana %d de 2019: %f' % (week, inverted))
+        history.append(inverted)
+        week += 1
+    
+    #plots dos resultados
+    plt.plot(ts2, color='black')
+    plt.plot(history, color='orange')
+
+    st.pyplot(plt)
+
+    MAE = mean_absolute_error(results.fittedvalues, ts.values[1:])
+    #print('-------------------')
+    #print('Mean Absolute Error - ', MAE)
+    st.write('Mean Absolute Error - ', MAE)
+
 
 if __name__ == '__main__':
 	main()
