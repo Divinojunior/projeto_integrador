@@ -30,7 +30,7 @@ def main():
 	
 	page = st.sidebar.selectbox("Escolha uma página", ["Visualização dos dados",
                                 "Histórico de vendas","Predição por ML (Visão Cientista de Dados)",
-                                "Predição por ML (Visão Business)","Predição por NPL (Visão Business)"])
+                                "Predição por ML (Visão Business)","Predição por ARIMA (Visão Business)"])
 	
 	if page == "Visualização dos dados":
 		st.header("Explore aqui o seu Dataset")
